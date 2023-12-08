@@ -1,4 +1,4 @@
-import React, { Fragment, useRef, useState } from 'react';
+import React, { Fragment, useRef, useState, useLayoutEffect } from 'react';
 import { ProTable, PageContainer } from '@ant-design/pro-components';
 import { Button, Tag, Input, Modal, Alert, message } from 'antd';
 import { Tabs } from 'antd';
@@ -104,7 +104,7 @@ const DetailView = ({ record, onClose }) => {
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
       {/* 详细信息部分 */}
       <div style={{ flexBasis: '80%' }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+        {/* <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
           <img src={exampleImage1} alt="门脸图" style={{ margin: '20px' }} />
           <div
             style={{
@@ -117,7 +117,7 @@ const DetailView = ({ record, onClose }) => {
             <h3>企业入驻审核</h3>
             <span>请尽快审核企业入驻信息，以免造成客户流失</span>
           </div>
-        </div>
+        </div> */}
         {/* 基础信息 */}
         <div style={{ fontWeight: 'bold' }}>基础信息</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '0.5rem' }}>
@@ -224,7 +224,7 @@ const DetailView = ({ record, onClose }) => {
 
       {/* 操作按钮部分 */}
       {!isApproved && (
-        <div style={{ flexBasis: '20%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <Button type="primary" onClick={handleApprove}>
             同意申请
           </Button>
@@ -235,7 +235,7 @@ const DetailView = ({ record, onClose }) => {
       )}
 
       {isApproved && (
-        <div style={{ flexBasis: '20%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <Button type="primary">查看企业</Button>
         </div>
       )}
@@ -266,15 +266,41 @@ const DetailView = ({ record, onClose }) => {
   );
 };
 
+function useAdjustedWidth() {
+  const [adjustedWidth, setAdjustedWidth] = useState('100%');
+
+  useLayoutEffect(() => {
+    function updateWidth() {
+      const sider = document.querySelector('.ant-layout-sider-children') as HTMLElement;
+      if (sider) {
+        const siderWidth = sider.offsetWidth;
+        const newWidth = `calc(100% - ${siderWidth}px)`;
+        setAdjustedWidth(newWidth);
+      } else {
+        setAdjustedWidth('100%');
+      }
+    }
+
+    window.addEventListener('resize', updateWidth);
+    updateWidth(); // 初始化宽度
+
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
+
+  return adjustedWidth;
+}
+
 const DetailEnterprise = ({ hidddenButtons, onClose }) => {
   // 弹框显示状态
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [isApproved, setIsApproved] = useState(false); // 新增状态
+  const [isClick, setIsClick] = useState(false);
   // 显示弹框
   const showRejectModal = () => {
     setIsModalVisible(true);
   };
+  const adjustedWidth = useAdjustedWidth();
 
   console.log('===================hidddenButtons,isApproved', hidddenButtons, isApproved);
   // 隐藏弹框
@@ -303,15 +329,24 @@ const DetailEnterprise = ({ hidddenButtons, onClose }) => {
   const handleChange = (e) => {
     setRejectReason(e.target.value);
   };
+  const handleClick = () => {
+    setIsClick(!isClick);
+  };
   // 示例图片链接
   const exampleImage = 'https://via.placeholder.com/200';
   const exampleImage1 = 'https://via.placeholder.com/50';
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        flexDirection: 'column',
+      }}
+    >
       {/* 详细信息部分 */}
-      <div style={{ flexBasis: '80%' }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+      <div style={{ padding: '0.5rem 2.5rem' }}>
+        {/* <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
           <img src={exampleImage1} alt="门脸图" style={{ margin: '20px' }} />
           <div
             style={{
@@ -324,7 +359,7 @@ const DetailEnterprise = ({ hidddenButtons, onClose }) => {
             <h3>企业入驻审核</h3>
             <span>请尽快审核企业入驻信息，以免造成客户流失</span>
           </div>
-        </div>
+        </div> */}
         {/* 基础信息 */}
         <div style={{ fontWeight: 'bold' }}>基础信息</div>
         <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '0.5rem' }}>
@@ -395,10 +430,20 @@ const DetailEnterprise = ({ hidddenButtons, onClose }) => {
           <img src={exampleImage} alt="手持身份证正脸照" style={{ margin: '20px' }} />
         </div>
       </div>
-
-      {/* 操作按钮部分 */}
-
-      <div style={{ flexBasis: '20%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div
+        style={{
+          width: adjustedWidth, // 应用计算后的宽度
+          position: 'fixed',
+          bottom: ' 0',
+          height: '40px',
+          backgroundColor: '#FFF',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          padding: '0.5rem',
+          gap: '.5rem',
+        }}
+      >
         {hidddenButtons && !isApproved ? (
           <>
             <Button type="primary" onClick={handleApprove}>
@@ -410,15 +455,18 @@ const DetailEnterprise = ({ hidddenButtons, onClose }) => {
           </>
         ) : (
           <>
-            <Button type="primary">查看企业</Button>
-            <img width="220" src={img3} alt="Some Image" />
+            <Button type="primary" onClick={handleClick}>
+              <span>查看企业</span>
+            </Button>
           </>
         )}
         <Button type="default" onClick={handleBack}>
           返回
         </Button>
       </div>
+      {isClick && <img width="220" src={img3} alt="Some Image" className="isClick" />}
 
+      {/* 操作按钮部分 */}
       {/* 驳回原因弹框 */}
       <Modal
         title="驳回原因"

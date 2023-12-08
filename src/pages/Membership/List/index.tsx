@@ -79,7 +79,7 @@ const DetailView = ({ record, onClose }) => {
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
       {/* 详细信息部分 */}
       <div style={{ flexBasis: '80%' }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+        {/* <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
           <img src={exampleImage1} alt="门脸图" style={{ margin: '20px' }} />
           <div
             style={{
@@ -92,7 +92,7 @@ const DetailView = ({ record, onClose }) => {
             <h3>企业入驻审核</h3>
             <span>请尽快审核企业入驻信息，以免造成客户流失</span>
           </div>
-        </div>
+        </div> */}
         {/* 基础信息 */}
         <div style={{ fontWeight: 'bold' }}>基础信息</div>
         <div style={{ display: 'flex', flexWrap: 'wrap' }}>
@@ -279,16 +279,6 @@ const TableList: React.FC = () => {
       key: 'recentConsumption',
       ellipsis: true,
       sorter: (a, b) => a.recentConsumption.localeCompare(b.recentConsumption), // 假设为字符串日期
-    },
-    {
-      title: '操作',
-      key: 'action',
-      render: (_, record) => (
-        <Button type="link" onClick={() => handleDetailClick(record)}>
-          详情
-        </Button>
-      ),
-      ellipsis: true,
     },
   ];
 

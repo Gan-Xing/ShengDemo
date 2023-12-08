@@ -1,4 +1,4 @@
-import React, { Fragment, useRef, useState } from 'react';
+import React, { Fragment, useRef, useState, useLayoutEffect } from 'react';
 import { ProTable, PageContainer } from '@ant-design/pro-components';
 import {
   Tabs,
@@ -20,6 +20,30 @@ import img5 from './img5.png';
 import img6 from './img6.png';
 
 // 假数据
+
+function useAdjustedWidth() {
+  const [adjustedWidth, setAdjustedWidth] = useState('100%');
+
+  useLayoutEffect(() => {
+    function updateWidth() {
+      const sider = document.querySelector('.ant-layout-sider-children') as HTMLElement;
+      if (sider) {
+        const siderWidth = sider.offsetWidth;
+        const newWidth = `calc(100% - ${siderWidth}px)`;
+        setAdjustedWidth(newWidth);
+      } else {
+        setAdjustedWidth('100%');
+      }
+    }
+
+    window.addEventListener('resize', updateWidth);
+    updateWidth(); // 初始化宽度
+
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
+
+  return adjustedWidth;
+}
 function generateMockData(numEntries: number) {
   const mockData = [];
 
@@ -120,13 +144,13 @@ const DetailView = ({ onClose, record }) => {
     });
     setData(newData);
   };
-
+  const adjustedWidth = useAdjustedWidth();
   return (
-    <div className="Plans" style={{ padding: '1rem', gap: '1rem' }}>
+    <div className="Plans" style={{ padding: '1rem 0', gap: '1rem' }}>
       <Form layout="vertical">
         <h3 style={{ padding: '1rem 0' }}>基本信息</h3>
         <Form.Item label="方案名称">
-          <Input value={planName} onChange={(e) => setPlanName(e.target.value)} />
+          <Input value={planName || ''} onChange={(e) => setPlanName(e.target.value)} />
         </Form.Item>
         <Form.Item label="会员类型">
           <Radio.Group value={memberType} onChange={(e) => setMemberType(e.target.value)}>
@@ -173,13 +197,27 @@ const DetailView = ({ onClose, record }) => {
         ) : (
           <img width="816" style={{ margin: '1rem 0' }} src={img5} />
         )}
-        <Space style={{ marginTop: '1rem' }}>
-          <Button type="primary" onClick={handleSave}>
-            保存
-          </Button>
-          <Button onClick={onClose}>取消</Button>
-        </Space>
+        <Space style={{ marginTop: '1rem' }}></Space>
       </Form>
+      <div
+        style={{
+          width: adjustedWidth, // 应用计算后的宽度
+          position: 'fixed',
+          bottom: ' 0',
+          height: '40px',
+          backgroundColor: '#FFF',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          padding: '0.5rem',
+          gap: '.5rem',
+        }}
+      >
+        <Button type="primary" onClick={handleSave}>
+          保存
+        </Button>
+        <Button onClick={onClose}>取消</Button>
+      </div>
     </div>
   );
 };
@@ -226,7 +264,7 @@ const TableList: React.FC = () => {
       setSelectedRecord(mockRecord);
     } else {
       const mockRecord = {
-        planName: `${record.planName}`,
+        planName: `${record.planName || ''}`,
         memberType: 'paid',
         status: 'inactive',
         registrationRequirement: 'notRequired',

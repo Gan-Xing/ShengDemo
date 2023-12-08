@@ -1,4 +1,4 @@
-import React, { Fragment, useRef, useState } from 'react';
+import React, { Fragment, useRef, useState, useLayoutEffect } from 'react';
 import { ProTable, PageContainer } from '@ant-design/pro-components';
 import { Button, Tag, Input, Modal, Alert, message, Card } from 'antd';
 import { Tabs } from 'antd';
@@ -509,7 +509,29 @@ const GoodList = () => {
     </Fragment>
   );
 };
+function useAdjustedWidth() {
+  const [adjustedWidth, setAdjustedWidth] = useState('100%');
 
+  useLayoutEffect(() => {
+    function updateWidth() {
+      const sider = document.querySelector('.ant-layout-sider-children') as HTMLElement;
+      if (sider) {
+        const siderWidth = sider.offsetWidth;
+        const newWidth = `calc(100% - ${siderWidth}px)`;
+        setAdjustedWidth(newWidth);
+      } else {
+        setAdjustedWidth('100%');
+      }
+    }
+
+    window.addEventListener('resize', updateWidth);
+    updateWidth(); // 初始化宽度
+
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
+
+  return adjustedWidth;
+}
 const DetailView = ({ record, onClose }) => {
   // 弹框显示状态
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -618,11 +640,12 @@ const DetailView = ({ record, onClose }) => {
       </Fragment>
     );
   };
+  const adjustedWidth = useAdjustedWidth();
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
       {/* 详细信息部分 */}
-      <div style={{ flexBasis: '80%' }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+      <div>
+        {/* <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
           <img src={exampleImage1} alt="门脸图" style={{ margin: '20px' }} />
           <div
             style={{
@@ -637,7 +660,7 @@ const DetailView = ({ record, onClose }) => {
               2023-09-04 17:34:46入驻 门店入驻
             </span>
           </div>
-        </div>
+        </div> */}
 
         <Tabs defaultActiveKey="1" onChange={callback}>
           <TabPane tab="基本信息" key="1">
@@ -668,14 +691,31 @@ const DetailView = ({ record, onClose }) => {
           </Button>
         </div>
       )} */}
-      <div style={{ flexBasis: '20%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <h3>操作</h3>
-        <div style={{ flexBasis: '20%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div
+        style={{
+          width: adjustedWidth, // 应用计算后的宽度
+          position: 'fixed',
+          bottom: ' 0',
+          height: '40px',
+          backgroundColor: '#FFF',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          padding: '0.5rem',
+          gap: '.5rem',
+        }}
+      >
+        <Button type="default" onClick={handleBack}>
+          返回
+        </Button>
+      </div>
+      {/* <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <Button type="default" onClick={handleBack}>
             返回
           </Button>
         </div>
-      </div>
+      </div> */}
 
       {/* 驳回原因弹框 */}
       <Modal
